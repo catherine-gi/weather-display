@@ -4,6 +4,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -35,26 +36,30 @@ app.get('/api/compareIfSame', async (req, res) => {
 
         const formatDate = (date) => date.toISOString().split('T')[0];
 
+
         const todayStr = formatDate(today);
         const yesterdayStr = formatDate(yesterday);
+
+        console.log(todayStr);
+        console.log(yesterdayStr);
 
         const [todayResponse, yesterdayResponse] = await Promise.all([
         axios.get(`${baseUrl}${todayStr}`),
         axios.get(`${baseUrl}${yesterdayStr}`)
         ]);
+        console.log(todayResponse.data)
 
-        console.log(todayResponse);
-        console.log(yesterdayResponse);
+        const hash1 = hashJson(todayResponse.data);
+        const hash2 = hashJson(yesterdayResponse.data);
+        res.json({res:hash1===hash2});
 
-        const hash1 = hashJson(json1);
-        const hash2 = hashJson(json2);
-
-        if(hash1===hash2){
-            res.json({res:True});
-        }
-        else{
-            res.json({res:False})
-        }
+        // if(hash1===hash2){
+        //     // CALL THE EMAIL FUNCTION FROM HERE!!!!
+        //     res.json({res:true});
+        // }
+        // else{
+        //     res.json({res:false})
+        // }
 
 
 
@@ -65,7 +70,7 @@ app.get('/api/compareIfSame', async (req, res) => {
 
     
 
-    res.json({ data: 'This is an example API endpoint' });
+    
 });
 
 
