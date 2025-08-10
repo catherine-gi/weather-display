@@ -3,15 +3,23 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config();
 
 const app = express();
+const baseUrl = 'https://imd-new-api.onrender.com/api/data/';
 
 // Middleware
 app.use(express.json());  // Parse JSON request body
 app.use(cors());          // Enable CORS
 app.use(morgan('dev'));   // Logging
+
+function hashJson(obj) {
+//   const sorted = sortObject(obj);
+  const jsonString = JSON.stringify(obj);
+  return crypto.createHash('sha256').update(jsonString).digest('hex');
+}
 
 // Health Check Route
 app.get('/', (req, res) => {
@@ -19,9 +27,47 @@ app.get('/', (req, res) => {
 });
 
 // Example API Route
-app.get('/api/example', (req, res) => {
-  res.json({ data: 'This is an example API endpoint' });
+app.get('/api/compareIfSame', async (req, res) => {
+    try {
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+        const formatDate = (date) => date.toISOString().split('T')[0];
+
+        const todayStr = formatDate(today);
+        const yesterdayStr = formatDate(yesterday);
+
+        const [todayResponse, yesterdayResponse] = await Promise.all([
+        axios.get(`${baseUrl}${todayStr}`),
+        axios.get(`${baseUrl}${yesterdayStr}`)
+        ]);
+
+        console.log(todayResponse);
+        console.log(yesterdayResponse);
+
+        const hash1 = hashJson(json1);
+        const hash2 = hashJson(json2);
+
+        if(hash1===hash2){
+            res.json({res:True});
+        }
+        else{
+            res.json({res:False})
+        }
+
+
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+
+    
+
+    res.json({ data: 'This is an example API endpoint' });
 });
+
 
 // 404 Handler
 app.use((req, res) => {
