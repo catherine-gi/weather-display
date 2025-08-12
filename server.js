@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 // Example API Route
 app.get('/api/compareIfSame', async (req, res) => {
     try {
+      console.log("heyy");
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
@@ -69,13 +70,14 @@ app.get('/api/compareIfSame', async (req, res) => {
     }
 });
 
-app.post('/api/getData', async (req, res) => {
+app.get('/api/getData', async (req, res) => {
+  console.log("heyy");
     try {
         const today = new Date();
         const todayStr = formatDate(today);
         const rawRes = await axios.get(`${baseUrl}${todayStr}`);
-        const res = rawRes.data;
-        res.json({res:res});
+        const response = rawRes.data;
+        res.json({res:response});
     }
     catch (error) {
         console.error(error);
