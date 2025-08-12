@@ -22,6 +22,9 @@ function hashJson(obj) {
   return crypto.createHash('sha256').update(jsonString).digest('hex');
 }
 
+// formats date
+const formatDate = (date) => date.toISOString().split('T')[0];
+
 // Health Check Route
 app.get('/', (req, res) => {
   res.json({ message: 'Server is running 🚀' });
@@ -33,9 +36,6 @@ app.get('/api/compareIfSame', async (req, res) => {
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-
-        const formatDate = (date) => date.toISOString().split('T')[0];
-
 
         const todayStr = formatDate(today);
         const yesterdayStr = formatDate(yesterday);
@@ -51,15 +51,15 @@ app.get('/api/compareIfSame', async (req, res) => {
 
         const hash1 = hashJson(todayResponse.data);
         const hash2 = hashJson(yesterdayResponse.data);
-        res.json({res:hash1===hash2});
+        // res.json({res:hash1===hash2});
 
-        // if(hash1===hash2){
-        //     // CALL THE EMAIL FUNCTION FROM HERE!!!!
-        //     res.json({res:true});
-        // }
-        // else{
-        //     res.json({res:false})
-        // }
+        if(hash1===hash2){
+            // CALL THE EMAIL FUNCTION FROM HERE!!!!
+            res.json({res:true});
+        }
+        else{
+            res.json({res:false})
+        }
 
 
 
@@ -67,10 +67,20 @@ app.get('/api/compareIfSame', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
+});
 
-    
-
-    
+app.post('/api/getData', async (req, res) => {
+    try {
+        const today = new Date();
+        const todayStr = formatDate(today);
+        const rawRes = await axios.get(`${baseUrl}${todayStr}`);
+        const res = rawRes.data;
+        res.json({res:res});
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
 });
 
 
