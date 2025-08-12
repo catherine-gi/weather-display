@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -52,10 +53,15 @@ app.get('/api/compareIfSame', async (req, res) => {
 
         const hash1 = hashJson(todayResponse.data);
         const hash2 = hashJson(yesterdayResponse.data);
-        // res.json({res:hash1===hash2});
+        //res.json({res:hash1===hash2});
 
         if(hash1===hash2){
             // CALL THE EMAIL FUNCTION FROM HERE!!!!
+            sendEmail(
+                'randommail@gmail.com',
+                'Test Email from Node.js',
+                'ALERT!!!!!!!!!! SENSOR NOT SENSORING :(.'
+            );
             res.json({res:true});
         }
         else{
@@ -102,3 +108,31 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
+// Function to send email
+export async function sendEmail(to, subject, text) {
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user:'fourxxxxgpuxxxxxx@gmail.com',
+              pass:'xxxxxxxxx'
+                // user: process.env.EMAIL_USER,
+                // pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to,
+            subject,
+            text
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully!');
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+}
